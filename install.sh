@@ -431,6 +431,7 @@ function start_menu(){
     ;;
     4)
     cat /usr/local/etc/xray/myconfig.json
+    ;;
     0)
     exit 1
     ;;
