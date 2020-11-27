@@ -344,9 +344,13 @@ EOF
         green "======nginx信息======"
         red "申请证书失败，请尝试手动申请证书."
     fi    
-    green "=================xray配置文件=================="
+    green "==xray客户端配置文件存放路径=="
+    green "/usr/local/etc/xray/client.json"
+    echo
+    echo
+    green "==xray配置参数=="
     cat /usr/local/etc/xray/myconfig.json
-    green "本次安装检测信息如下："
+    green "本次安装检测信息如下，如nginx与xray正常启动，表示安装正常："
     ps -aux | grep -e nginx -e xray
     
 }
@@ -408,6 +412,7 @@ function start_menu(){
     green " 1. 安装 xray + tcp + xtls"
     green " 2. 更新 xray"
     red " 3. 删除 xray"
+    green "4. 查看配置参数"
     yellow " 0. Exit"
     echo
     read -p "输入数字:" num
@@ -424,6 +429,8 @@ function start_menu(){
     3)
     remove_xray 
     ;;
+    4)
+    cat /usr/local/etc/xray/myconfig.json
     0)
     exit 1
     ;;
