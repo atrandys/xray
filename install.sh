@@ -412,7 +412,7 @@ function start_menu(){
     green " 1. 安装 xray + tcp + xtls"
     green " 2. 更新 xray"
     red " 3. 删除 xray"
-    green "4. 查看配置参数"
+    green " 4. 查看配置参数"
     yellow " 0. Exit"
     echo
     read -p "输入数字:" num
