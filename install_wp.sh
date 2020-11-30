@@ -364,7 +364,7 @@ cat > /usr/local/etc/xray/config.json<<-EOF
                         "id": "$v2uuid", 
                         "level": 0, 
                         "email": "a@b.com",
-                        "flow":"xtls-rprx-origin"
+                        "flow":"xtls-rprx-direct"
                     }
                 ], 
                 "decryption": "none", 
@@ -428,7 +428,7 @@ cat > /usr/local/etc/xray/client.json<<-EOF
                         "users": [
                             {
                                 "id": "$v2uuid",
-                                "flow": "xtls-rprx-origin",
+                                "flow": "xtls-rprx-direct",
                                 "encryption": "none",
                                 "level": 0
                             }
