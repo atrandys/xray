@@ -20,12 +20,12 @@ bash <(curl -Ls https://raw.githubusercontent.com/atrandys/xray/main/install_wp.
 
 ## client使用
 - OpenWrt
-  - PassWall
+  - [PassWall](https://github.com/xiaorouji/openwrt-passwall)
 - Windows
-  - v2rayN
+  - [v2rayN](https://github.com/2dust/v2rayN)
 - Android
-  - v2rayNG
+  - [v2rayNG](https://github.com/2dust/v2rayNG)
 - iOS / Mac
-  - Shadowrocket
+  - [Shadowrocket](https://apps.apple.com/app/shadowrocket/id932747118)
 
 
