@@ -296,16 +296,16 @@ install_xray(){
         wget https://github.com/atrandys/trojan/raw/master/fakesite.zip
         unzip -o fakesite.zip
     fi
-    if [ "$config_type" == "tcp_xtls" ]; then
-        config_tcp_xtls
+    config_tcp_xtls
+    config_tcp_tls
+    config_ws_tls
+    if [ "$config_type" == "tcp_xtls" ]; then      
         change_2_tcp_xtls
     fi
-    if [ "$config_type" == "tcp_tls" ]; then
-        config_tcp_tls
+    if [ "$config_type" == "tcp_tls" ]; then   
         change_2_tcp_tls
     fi
-    if [ "$config_type" == "ws_tls" ]; then
-        config_ws_tls
+    if [ "$config_type" == "ws_tls" ]; then  
         change_2_ws_tls
         change_2_ws_nginx
     fi
