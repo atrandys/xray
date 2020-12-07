@@ -216,7 +216,7 @@ server {
 }
 EOF
     change_2_tcp_nginx
-
+    systemctl restart nginx.service
 fi
 
 if [ "$config_type" == "ws_tls" ]; then
