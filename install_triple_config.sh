@@ -162,7 +162,7 @@ check_domain(){
 install_nginx(){
     green "$(date +"%Y-%m-%d %H:%M:%S") ==== 安装nginx"
     $systemPackage install -y nginx
-    if [ -f "/etc/nginx" ]; then
+    if [ ! -f "/etc/nginx" ]; then
         red "$(date +"%Y-%m-%d %H:%M:%S") - 看起来nginx没有安装成功，请先使用脚本中的删除xray功能，然后再重新安装.\n== Install failed."
         exit 1
     fi
@@ -592,10 +592,10 @@ remove_xray(){
 function start_menu(){
     clear
     green " ======================================================="
-    green " 描述：xray一键安装脚本，生成多个配置，支持配置文件切换"
-    green " 配置：vless+tcp+xtls/vless+tcp+tls/vless+ws+tls"
-    green " 系统：支持centos7/debian9+/ubuntu16.04+"
-    green " 作者：atrandys  www.atrandys.com"
+    echo -e "\033[34m\033[01m描述：\033[0m \033[32m\033[01mxray一键安装脚本，生成多个配置，支持配置文件切换\033[0m"
+    echo -e "\033[34m\033[01m配置：\033[0m \033[32m\033[01mvless+tcp+xtls/vless+tcp+tls/vless+ws+tls\033[0m"
+    echo -e "\033[34m\033[01m系统：\033[0m \033[32m\033[01m支持centos7/debian9+/ubuntu16.04+\033[0m"
+    echo -e "\033[34m\033[01m作者：\033[0m \033[32m\033[01matrandys  www.atrandys.com\033[0m"
     green " ======================================================="
     echo
     green " 1. 安装 xray: vless+tcp+xtls(推荐)"
@@ -630,47 +630,56 @@ function start_menu(){
     systemctl restart xray
     ;;
     5)
-        green "========================================================"
-        green "当前配置：$(cat /usr/local/etc/xray/atrandys_config)"
-        red "注意！切换配置会使自定义修改的config.json内容丢失，请知晓"
-        green "========================================================"
-        echo
-        green " 1. 切换至vless+tcp+xtls"
-        green " 2. 切换至vless+tcp+tls"
-        green " 3. 切换至vless+ws+tls"
-        yellow " 0. 返回上级"
-        echo
-        read -p "输入数字:" num
-        case "$num" in
-        1)
-        change_2_tcp_xtls
-        change_2_tcp_nginx
-        systemctl rsetart nginx
-        systemctl restart xray
-        ;;
-        2)
-        change_2_tcp_tls
-        change_2_tcp_nginx
-        systemctl rsetart nginx
-        systemctl restart xray
-        ;;
-        3)
-        change_2_ws_tls
-        change_2_ws_nginx
-        systemctl rsetart nginx
-        systemctl restart xray
-        ;;
-        0)
-        clear
-        start_menu
-        ;;
-        *)
-        clear
-        red "请输入正确的数字"
-        sleep 2s
-        start_menu
-        ;;
-        esac
+        if [ -f "/usr/local/etc/xray/atrandys_config" ]; then
+            green "========================================================="
+            green "当前配置：$(cat /usr/local/etc/xray/atrandys_config)"
+            red "注意！切换配置会使自定义修改的config.json内容丢失，请知晓"
+            green "========================================================="
+            echo
+            green " 1. 切换至vless+tcp+xtls"
+            green " 2. 切换至vless+tcp+tls"
+            green " 3. 切换至vless+ws+tls"
+            yellow " 0. 返回上级"
+            echo
+            read -p "输入数字:" num
+            case "$num" in
+            1)
+            change_2_tcp_xtls
+            change_2_tcp_nginx
+            systemctl rsetart nginx
+            systemctl restart xray
+            ;;
+            2)
+            change_2_tcp_tls
+            change_2_tcp_nginx
+            systemctl rsetart nginx
+            systemctl restart xray
+            ;;
+            3)
+            change_2_ws_tls
+            change_2_ws_nginx
+            systemctl rsetart nginx
+            systemctl restart xray
+            ;;
+            0)
+            clear
+            start_menu
+            ;;
+            *)
+            clear
+            red "请输入正确的数字"
+            sleep 2s
+            start_menu
+            ;;
+            esac
+        else
+            red "似乎你还没有使用过本脚本安装xray，不存在相关配置"
+            sleep 2s
+            clear
+            start_menu
+            ;;
+        fi
+        
     ;;
     6)
     remove_xray 
