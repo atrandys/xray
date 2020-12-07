@@ -646,19 +646,19 @@ function start_menu(){
             1)
             change_2_tcp_xtls
             change_2_tcp_nginx
-            systemctl rsetart nginx
+            systemctl restart nginx
             systemctl restart xray
             ;;
             2)
             change_2_tcp_tls
             change_2_tcp_nginx
-            systemctl rsetart nginx
+            systemctl restart nginx
             systemctl restart xray
             ;;
             3)
             change_2_ws_tls
             change_2_ws_nginx
-            systemctl rsetart nginx
+            systemctl restart nginx
             systemctl restart xray
             ;;
             0)
