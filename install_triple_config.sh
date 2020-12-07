@@ -677,7 +677,6 @@ function start_menu(){
             sleep 2s
             clear
             start_menu
-            ;;
         fi
         
     ;;
