@@ -426,7 +426,7 @@ function start_menu(){
     ;;
     2)
     bash <(curl -L https://raw.githubusercontent.com/XTLS/Xray-install/main/install-release.sh)
-    systemctl restart x2ray
+    systemctl restart xray
     ;;
     3)
     remove_xray 
