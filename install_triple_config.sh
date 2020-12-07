@@ -458,8 +458,8 @@ cat > /usr/local/etc/xray/tcp_tls_config.json<<-EOF
                     ], 
                     "certificates": [
                         {
-                            "certificateFile": "/usr/local/etc/v2ray/cert/fullchain.cer", 
-                            "keyFile": "/usr/local/etc/v2ray/cert/private.key"
+                            "certificateFile": "/usr/local/etc/xray/cert/fullchain.cer", 
+                            "keyFile": "/usr/local/etc/xray/cert/private.key"
                         }
                     ]
                 }
