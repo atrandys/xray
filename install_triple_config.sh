@@ -554,13 +554,13 @@ change_2_ws_tls(){
 get_myconfig(){
     check_config_type=$(cat /usr/local/etc/xray/atrandys_config)
     green "当前配置：$check_config_type"
-    if [ "$check_config" == "tcp_xtls" ]; then
+    if [ "$check_config_type" == "tcp_xtls" ]; then
         cat /usr/local/etc/xray/myconfig_tcp_xtls.json
     fi
-    if [ "$check_config" == "tcp_tls" ]; then
+    if [ "$check_config_type" == "tcp_tls" ]; then
         cat /usr/local/etc/xray/myconfig_tcp_tls.json
     fi
-    if [ "$check_config" == "ws_tls" ]; then
+    if [ "$check_config_type" == "ws_tls" ]; then
         cat /usr/local/etc/xray/myconfig_ws_tls.json
     fi
 }
