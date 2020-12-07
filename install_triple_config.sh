@@ -192,7 +192,6 @@ http {
 }
 EOF
 
-if [ "$config_type" == "tcp_xtls" ] || [ "$config_type" == "tcp_tls" ]; then
 cat > /etc/nginx/atrandys/tcp_default.conf<<-EOF
  server {
     listen       127.0.0.1:37212;
@@ -215,22 +214,8 @@ server {
     #rewrite ^(.*)$  https://\$host\$1 permanent; 
 }
 EOF
-    change_2_tcp_nginx
-    systemctl restart nginx.service
-fi
 
-if [ "$config_type" == "ws_tls" ]; then
 newpath=$(cat /dev/urandom | head -1 | md5sum | head -c 4)
-cat > /etc/nginx/conf.d/default.conf<<-EOF
-server { 
-    listen       80;
-    server_name  $your_domain;
-    root /usr/share/nginx/html;
-    index index.php index.html;
-    #rewrite ^(.*)$  https://\$host\$1 permanent; 
-}
-EOF
-
 cat > /etc/nginx/atrandys/ws_default.conf<<-EOF
 server { 
     listen       80;
@@ -254,6 +239,22 @@ server {
         proxy_set_header Connection "upgrade";
         proxy_set_header Host \$http_host;
     }
+}
+EOF
+
+if [ "$config_type" == "tcp_xtls" ] || [ "$config_type" == "tcp_tls" ]; then
+    change_2_tcp_nginx
+    systemctl restart nginx.service
+fi
+
+if [ "$config_type" == "ws_tls" ]; then
+cat > /etc/nginx/conf.d/default.conf<<-EOF
+server { 
+    listen       80;
+    server_name  $your_domain;
+    root /usr/share/nginx/html;
+    index index.php index.html;
+    #rewrite ^(.*)$  https://\$host\$1 permanent; 
 }
 EOF
     systemctl restart nginx.service
