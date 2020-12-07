@@ -418,7 +418,7 @@ change_2_tcp_xtls(){
 }
 
 config_tcp_tls(){
-cat > /usr/local/etc/v2ray/tcp_tls_config.json<<-EOF
+cat > /usr/local/etc/xray/tcp_tls_config.json<<-EOF
 {
     "log": {
         "loglevel": "warning"
@@ -475,7 +475,7 @@ cat > /usr/local/etc/v2ray/tcp_tls_config.json<<-EOF
 }
 EOF
 
-cat > /usr/local/etc/v2ray/myconfig_tcp_tls.json<<-EOF
+cat > /usr/local/etc/xray/myconfig_tcp_tls.json<<-EOF
 {
 ===========配置参数=============
 地址：${your_domain}
@@ -497,7 +497,7 @@ change_2_tcp_tls(){
 }
 
 config_ws_tls(){
-cat > /usr/local/etc/v2ray/ws_tls_config.json<<-EOF
+cat > /usr/local/etc/xray/ws_tls_config.json<<-EOF
 {
   "log" : {
     "loglevel": "warning"
@@ -530,7 +530,7 @@ cat > /usr/local/etc/v2ray/ws_tls_config.json<<-EOF
 }
 EOF
 
-cat > /usr/local/etc/v2ray/myconfig_ws_tls.json<<-EOF
+cat > /usr/local/etc/xray/myconfig_ws_tls.json<<-EOF
 {
 ===========配置参数=============
 地址：${your_domain}
