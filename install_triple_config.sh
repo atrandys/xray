@@ -537,8 +537,6 @@ cat > /usr/local/etc/xray/myconfig_ws_tls.json<<-EOF
 地址：${your_domain}
 端口：443
 uuid：${v2uuid}
-额外id：64
-加密方式：aes-128-gcm
 传输协议：ws
 别名：myws
 路径：${newpath}
