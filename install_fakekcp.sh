@@ -115,92 +115,11 @@ check_port(){
     green "$(date +"%Y-%m-%d %H:%M:%S") ==== 检查端口"
     $systemPackage -y install net-tools
     Port80=`netstat -tlpn | awk -F '[: ]+' '$1=="tcp"{print $5}' | grep -w 80`
-    Port443=`netstat -tlpn | awk -F '[: ]+' '$1=="tcp"{print $5}' | grep -w 443`
     if [ -n "$Port80" ]; then
         process80=`netstat -tlpn | awk -F '[: ]+' '$5=="80"{print $9}'`
         red "$(date +"%Y-%m-%d %H:%M:%S") - 80端口被占用,占用进程:${process80}\n== Install failed."
         exit 1
     fi
-    if [ -n "$Port443" ]; then
-        process443=`netstat -tlpn | awk -F '[: ]+' '$5=="443"{print $9}'`
-        red "$(date +"%Y-%m-%d %H:%M:%S") - 443端口被占用,占用进程:${process443}.\n== Install failed."
-        exit 1
-    fi
-}
-install_nginx(){
-    green "$(date +"%Y-%m-%d %H:%M:%S") ==== 安装nginx"
-    $systemPackage install -y nginx
-    if [ ! -d "/etc/nginx" ]; then
-        red "$(date +"%Y-%m-%d %H:%M:%S") - 看起来nginx没有安装成功，请先使用脚本中的删除xray功能，然后再重新安装.\n== Install failed."
-        exit 1
-    fi
-    
-cat > /etc/nginx/nginx.conf <<-EOF
-user  root;
-worker_processes  1;
-#error_log  /etc/nginx/error.log warn;
-#pid    /var/run/nginx.pid;
-events {
-    worker_connections  1024;
-}
-http {
-    include       /etc/nginx/mime.types;
-    default_type  application/octet-stream;
-    log_format  main  '\$remote_addr - \$remote_user [\$time_local] "\$request" '
-                      '\$status \$body_bytes_sent "\$http_referer" '
-                      '"\$http_user_agent" "\$http_x_forwarded_for"';
-    #access_log  /etc/nginx/access.log  main;
-    sendfile        on;
-    #tcp_nopush     on;
-    keepalive_timeout  120;
-    client_max_body_size 20m;
-    #gzip  on;
-    include /etc/nginx/conf.d/*.conf;
-}
-EOF
-
-cat > /etc/nginx/conf.d/default.conf<<-EOF
- server {
-    listen       127.0.0.1:37212;
-    server_name  $your_domain;
-    root /usr/share/nginx/html;
-    index index.php index.html index.htm;
-}
- server {
-    listen       127.0.0.1:37213 http2;
-    server_name  $your_domain;
-    root /usr/share/nginx/html;
-    index index.php index.html index.htm;
-}
-    
-server { 
-    listen       0.0.0.0:80;
-    server_name  $your_domain;
-    root /usr/share/nginx/html/;
-    index index.php index.html;
-    #rewrite ^(.*)$  https://\$host\$1 permanent; 
-}
-EOF
-    green "$(date +"%Y-%m-%d %H:%M:%S") ==== 检测nginx配置文件"
-    nginx -t
-    #CHECK=$(grep SELINUX= /etc/selinux/config | grep -v "#")
-    #if [ "$CHECK" != "SELINUX=disabled" ]; then
-    #    loggreen "设置Selinux允许nginx"
-    #    cat /var/log/audit/audit.log | grep nginx | grep denied | audit2allow -M mynginx  
-    #    semodule -i mynginx.pp 
-    #fi
-    systemctl enable nginx.service
-    systemctl restart nginx.service
-    green "$(date +"%Y-%m-%d %H:%M:%S") - 使用acme.sh申请https证书."
-    curl https://get.acme.sh | sh
-    ~/.acme.sh/acme.sh  --issue  -d $your_domain  --webroot /usr/share/nginx/html/
-    if test -s /root/.acme.sh/$your_domain/fullchain.cer; then
-        green "$(date +"%Y-%m-%d %H:%M:%S") - 申请https证书成功."
-    else
-        cert_failed="1"
-        red "$(date +"%Y-%m-%d %H:%M:%S") - 申请证书失败，请尝试手动申请证书."
-    fi
-    install_xray
 }
 
 install_xray(){ 
@@ -218,44 +137,22 @@ cat > /usr/local/etc/xray/config.json<<-EOF
     }, 
     "inbounds": [
         {
-            "listen": "0.0.0.0", 
-            "port": 443, 
+            "listen": "127.0.0.1", 
+            "port": 11234, 
             "protocol": "vless", 
             "settings": {
                 "clients": [
                     {
                         "id": "$v2uuid", 
-                        "level": 0, 
-                        "email": "a@b.com",
-                        "flow":"xtls-rprx-direct"
+                        "email": "a@b.com"
                     }
                 ], 
-                "decryption": "none", 
-                "fallbacks": [
-                    {
-                        "dest": 37212
-                    }, 
-                    {
-                        "alpn": "h2", 
-                        "dest": 37213
-                    }
-                ]
+                "decryption": "none"
             }, 
             "streamSettings": {
-                "network": "tcp", 
-                "security": "xtls", 
-                "xtlsSettings": {
-                    "serverName": "$your_domain", 
-                    "alpn": [
-                        "h2", 
-                        "http/1.1"
-                    ], 
-                    "certificates": [
-                        {
-                            "certificateFile": "/usr/local/etc/xray/cert/fullchain.cer", 
-                            "keyFile": "/usr/local/etc/xray/cert/private.key"
-                        }
-                    ]
+                "network": "kcp", 
+                "kcpSettings": {
+                    "seed": "atrandys"
                 }
             }
         }
