@@ -186,12 +186,12 @@ EOF
     password=$(randpwd)
 
 
-cat > /etc/wireguard/udp.sh <<-EOF
+cat > /usr/src/udp/udp.sh <<-EOF
 #!/bin/bash
 nohup usr/src/udp/udp2raw -s -l0.0.0.0:443 -r 127.0.0.1:11234  --raw-mode faketcp  -a -k $password >udp2raw.log 2>&1 &
 EOF
 
-    chmod +x /etc/wireguard/udp.sh
+    chmod +x /usr/src/udp/udp.sh
 
 #增加自启动脚本
 cat > /etc/systemd/system/autoudp.service<<-EOF
@@ -201,7 +201,7 @@ After=network.target
    
 [Service]  
 Type=forking
-ExecStart=/etc/wireguard/udp.sh
+ExecStart=/usr/src/udp/udp.sh
 ExecReload=/bin/kill -9 \$(pidof udp2raw) && /bin/kill -9 \$(pidof udpspeeder)
 Restart=on-failure
 RestartSec=1s
