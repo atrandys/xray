@@ -17,6 +17,18 @@ logcmd(){
     eval $1 | tee -ai /var/atrandys.log
 }
 
+randpwd(){
+    mpasswd=$(cat /dev/urandom | head -1 | md5sum | head -c 4)
+    echo ${mpasswd}  
+}
+
+rand(){
+    min=$1
+    max=$(($2-$min+1))
+    num=$(cat /dev/urandom | head -n 10 | cksum | awk -F ' ' '{print $1}')
+    echo $(($num%$max+$min))  
+}
+
 source /etc/os-release
 RELEASE=$ID
 VERSION=$VERSION_ID
@@ -67,17 +79,6 @@ check_release(){
             firewall-cmd --zone=public --add-port=443/tcp --permanent
             firewall-cmd --reload
         fi
-        while [ ! -f "nginx-release-centos-7-0.el7.ngx.noarch.rpm" ]
-        do
-            wget http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm
-            if [ ! -f "nginx-release-centos-7-0.el7.ngx.noarch.rpm" ]; then
-                red "$(date +"%Y-%m-%d %H:%M:%S") - 下载nginx rpm包失败，继续重试..."
-            fi
-        done
-        rpm -ivh nginx-release-centos-7-0.el7.ngx.noarch.rpm --force --nodeps
-        #logcmd "rpm -Uvh http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm --force --nodeps"
-        #loggreen "Prepare to install nginx."
-        #yum install -y libtool perl-core zlib-devel gcc pcre* >/dev/null 2>&1
         yum install -y epel-release
     elif [ "$RELEASE" == "ubuntu" ]; then
         systemPackage="apt-get"
@@ -114,10 +115,10 @@ check_release(){
 check_port(){
     green "$(date +"%Y-%m-%d %H:%M:%S") ==== 检查端口"
     $systemPackage -y install net-tools
-    Port80=`netstat -tlpn | awk -F '[: ]+' '$1=="tcp"{print $5}' | grep -w 80`
-    if [ -n "$Port80" ]; then
-        process80=`netstat -tlpn | awk -F '[: ]+' '$5=="80"{print $9}'`
-        red "$(date +"%Y-%m-%d %H:%M:%S") - 80端口被占用,占用进程:${process80}\n== Install failed."
+    Port443=`netstat -tlpn | awk -F '[: ]+' '$1=="tcp"{print $5}' | grep -w 443`
+    if [ -n "$Port443" ]; then
+        process443=`netstat -tlpn | awk -F '[: ]+' '$5=="443"{print $9}'`
+        red "$(date +"%Y-%m-%d %H:%M:%S") - 443端口被占用,占用进程:${process443}\n== Install failed."
         exit 1
     fi
 }
@@ -129,7 +130,9 @@ install_xray(){
     bash <(curl -L https://raw.githubusercontent.com/XTLS/Xray-install/main/install-release.sh)
     cd /usr/local/etc/xray/
     rm -f config.json
+    serverip=$(curl ipv4.icanhazip.com)
     v2uuid=$(cat /proc/sys/kernel/random/uuid)
+    seed=$(randpwd)
 cat > /usr/local/etc/xray/config.json<<-EOF
 {
     "log": {
@@ -152,7 +155,7 @@ cat > /usr/local/etc/xray/config.json<<-EOF
             "streamSettings": {
                 "network": "kcp", 
                 "kcpSettings": {
-                    "seed": "atrandys"
+                    "seed": "$seed"
                 }
             }
         }
@@ -165,150 +168,95 @@ cat > /usr/local/etc/xray/config.json<<-EOF
     ]
 }
 EOF
-cat > /usr/local/etc/xray/client.json<<-EOF
-{
-    "log": {
-        "loglevel": "warning"
-    },
-    "inbounds": [
-        {
-            "port": 1080,
-            "listen": "127.0.0.1",
-            "protocol": "socks",
-            "settings": {
-                "udp": true
-            }
-        }
-    ],
-    "outbounds": [
-        {
-            "protocol": "vless",
-            "settings": {
-                "vnext": [
-                    {
-                        "address": "$your_domain",
-                        "port": 443,
-                        "users": [
-                            {
-                                "id": "$v2uuid",
-                                "flow": "xtls-rprx-direct",
-                                "encryption": "none",
-                                "level": 0
-                            }
-                        ]
-                    }
-                ]
-            },
-            "streamSettings": {
-                "network": "tcp",
-                "security": "xtls",
-                "xtlsSettings": {
-                    "serverName": "$your_domain"
-                }
-            }
-        }
-    ]
-}
+    mkdir /usr/src/udp
+    cd /usr/src/udp
+    wget https://github.com/atrandys/wireguard/raw/master/udp2raw
+    wget https://raw.githubusercontent.com/atrandys/wireguard/master/run.sh
+    chmod +x udp2raw run.sh
+    password=$(randpwd)
+
+
+cat > /etc/wireguard/udp.sh <<-EOF
+#!/bin/bash
+nohup usr/src/udp/udp2raw -s -l0.0.0.0:443 -r 127.0.0.1:11234  --raw-mode faketcp  -a -k $password >udp2raw.log 2>&1 &
 EOF
-    if [ -d "/usr/share/nginx/html/" ]; then
-        cd /usr/share/nginx/html/ && rm -f ./*
-        wget https://github.com/atrandys/trojan/raw/master/fakesite.zip
-        unzip -o fakesite.zip
-    fi
+
+    chmod +x /etc/wireguard/udp.sh
+
+#增加自启动脚本
+cat > /etc/systemd/system/autoudp.service<<-EOF
+[Unit]  
+Description=autoudp 
+After=network.target  
+   
+[Service]  
+Type=forking
+ExecStart=/etc/wireguard/udp.sh
+ExecReload=/bin/kill -9 \$(pidof udp2raw) && /bin/kill -9 \$(pidof udpspeeder)
+Restart=on-failure
+RestartSec=1s
+   
+[Install]  
+WantedBy=multi-user.target
+EOF
+
+#设置脚本权限
+    chmod +x /etc/systemd/system/autoudp.service
+    systemctl enable autoudp.service
+    systemctl start autoudp.service
     systemctl enable xray.service
     sed -i "s/User=nobody/User=root/;" /etc/systemd/system/xray.service
     systemctl daemon-reload
-    ~/.acme.sh/acme.sh  --installcert  -d  $your_domain   \
-        --key-file   /usr/local/etc/xray/cert/private.key \
-        --fullchain-file  /usr/local/etc/xray/cert/fullchain.cer \
-        --reloadcmd  "chmod -R 777 /usr/local/etc/xray/cert && systemctl restart xray.service"
+    systemctl restart xray
 
 cat > /usr/local/etc/xray/myconfig.json<<-EOF
 {
-地址：${your_domain}
+==xray配置==
+IP：127.0.0.1
 端口：443
 id：${v2uuid}
 加密：none
-流控：xtls-rprx-direct
 别名：自定义
-传输协议：tcp
+传输协议：kcp
 伪装类型：none
-底层传输：xtls
-跳过证书验证：false
+seed： ${seed}
+==udp2raw==
+IP：${serverip}
+password：${password}
+raw-mode：faketcp
 }
 EOF
 
     green "== 安装完成."
-    if [ "$cert_failed" == "1" ]; then
-        green "======nginx信息======"
-        red "申请证书失败，请尝试手动申请证书."
-    fi    
-    green "==xray客户端配置文件存放路径=="
-    green "/usr/local/etc/xray/client.json"
-    echo
-    echo
     green "==xray配置参数=="
     cat /usr/local/etc/xray/myconfig.json
-    green "本次安装检测信息如下，如nginx与xray正常启动，表示安装正常："
-    ps -aux | grep -e nginx -e xray
+    green "本次安装检测信息如下，如udp2raw与xray正常启动，表示安装正常："
+    ps -aux | grep -e udp2raw -e xray
     
-}
-
-check_domain(){
-    $systemPackage install -y wget curl unzip
-    blue "Eenter your domain:"
-    read your_domain
-    real_addr=`ping ${your_domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}'`
-    local_addr=`curl ipv4.icanhazip.com`
-    if [ $real_addr == $local_addr ] ; then
-        green "域名解析地址与VPS IP地址匹配."
-        install_nginx
-    else
-        red "域名解析地址与VPS IP地址不匹配."
-        read -p "强制安装?请输入 [Y/n] :" yn
-        [ -z "${yn}" ] && yn="y"
-        if [[ $yn == [Yy] ]]; then
-            sleep 1s
-            install_nginx
-        else
-            exit 1
-        fi
-    fi
 }
 
 remove_xray(){
     green "$(date +"%Y-%m-%d %H:%M:%S") - 删除xray."
     systemctl stop xray.service
     systemctl disable xray.service
-    systemctl stop nginx
-    systemctl disable nginx
-    if [ "$RELEASE" == "centos" ]; then
-        yum remove -y nginx
-    else
-        apt-get -y autoremove nginx
-        apt-get -y --purge remove nginx
-        apt-get -y autoremove && apt-get -y autoclean
-        find / | grep nginx | sudo xargs rm -rf
-    fi
     rm -rf /usr/local/share/xray/ /usr/local/etc/xray/
     rm -f /usr/local/bin/xray
     rm -rf /etc/systemd/system/xray*
-    rm -rf /etc/nginx
-    rm -rf /usr/share/nginx/html/*
-    rm -rf /root/.acme.sh/
-    green "nginx & xray has been deleted."
+    rm -rf /etc/systemd/system/autoudp
+    rm -rf /usr/src/udp
+    green "xray & udp2raw has been deleted."
     
 }
 
 function start_menu(){
     clear
     green " ====================================================="
-    green " 描述：xray + tcp + xtls一键安装脚本"
+    green " 描述：xray + kcp + udp2raw一键安装脚本"
     green " 系统：支持centos7/debian9+/ubuntu16.04+     "
     green " 作者：atrandys  www.atrandys.com"
     green " ====================================================="
     echo
-    green " 1. 安装 xray + tcp + xtls"
+    green " 1. 安装 xray + kcp + udp2raw"
     green " 2. 更新 xray"
     red " 3. 删除 xray"
     green " 4. 查看配置参数"
@@ -319,7 +267,7 @@ function start_menu(){
     1)
     check_release
     check_port
-    check_domain
+    install_xray
     ;;
     2)
     bash <(curl -L https://raw.githubusercontent.com/XTLS/Xray-install/main/install-release.sh)
