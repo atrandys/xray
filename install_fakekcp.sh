@@ -155,6 +155,16 @@ cat > /usr/local/etc/xray/config.json<<-EOF
             "streamSettings": {
                 "network": "kcp", 
                 "kcpSettings": {
+                    "mtu": 1300,
+                    "tti": 20,
+                    "uplinkCapacity": 50,
+                    "downlinkCapacity": 10,
+                    "congestion": false,
+                    "readBufferSize": 2,
+                    "writeBufferSize": 2,
+                    "header": {
+                        "type": "none"
+                    },
                     "seed": "$seed"
                 }
             }
@@ -218,7 +228,13 @@ id：${v2uuid}
 加密：none
 别名：自定义
 传输协议：kcp
-伪装类型：none
+mtu：1300
+tti:：20
+uplinkCapacity：50
+downlinkCapacity：10
+congestion：false
+readBufferSize：2
+writeBufferSize：2
 seed： ${seed}
 ==udp2raw==
 IP：${serverip}
