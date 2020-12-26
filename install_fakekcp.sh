@@ -156,12 +156,12 @@ cat > /usr/local/etc/xray/config.json<<-EOF
                 "network": "kcp", 
                 "kcpSettings": {
                     "mtu": 1300,
-                    "tti": 20,
+                    "tti": 10,
                     "uplinkCapacity": 50,
                     "downlinkCapacity": 10,
                     "congestion": false,
-                    "readBufferSize": 2,
-                    "writeBufferSize": 2,
+                    "readBufferSize": 1,
+                    "writeBufferSize": 1,
                     "header": {
                         "type": "none"
                     },
@@ -229,12 +229,12 @@ id：${v2uuid}
 别名：自定义
 传输协议：kcp
 mtu：1300
-tti:：20
+tti:：10
 uplinkCapacity：50
 downlinkCapacity：10
 congestion：false
-readBufferSize：2
-writeBufferSize：2
+readBufferSize：1
+writeBufferSize：1
 seed： ${seed}
 ==udp2raw==
 IP：${serverip}
