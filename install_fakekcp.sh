@@ -223,7 +223,7 @@ cat > /usr/local/etc/xray/myconfig.json<<-EOF
 {
 ==xray配置==
 IP：127.0.0.1
-端口：443
+端口：2090
 id：${v2uuid}
 加密：none
 别名：自定义
@@ -238,6 +238,7 @@ writeBufferSize：2
 seed： ${seed}
 ==udp2raw==
 IP：${serverip}
+端口：443
 password：${password}
 raw-mode：faketcp
 }
