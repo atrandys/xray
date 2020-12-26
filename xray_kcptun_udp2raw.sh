@@ -190,7 +190,9 @@ EOF
     cd /usr/src/udp
     wget https://github.com/atrandys/wireguard/raw/master/udp2raw
     wget https://raw.githubusercontent.com/atrandys/wireguard/master/run.sh
-    chmod +x udp2raw run.sh
+    wget https://github.com/xtaci/kcptun/releases/download/v20201126/kcptun-linux-amd64-20201126.tar.gz
+    tar -xvf kcptun-linux-amd64-20201126.tar.gz
+    chmod +x udp2raw run.sh server_linux_amd64
     password=$(randpwd)
 
 
