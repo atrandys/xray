@@ -28,7 +28,15 @@ rand(){
     num=$(cat /dev/urandom | head -n 10 | cksum | awk -F ' ' '{print $1}')
     echo $(($num%$max+$min))  
 }
-
+echo "ulimit -n 65535" >>/etc/profile
+cat >>/etc/sysctl.conf<<-EOF
+net.core.rmem_max=26214400
+net.core.rmem_default=26214400
+net.core.wmem_max=26214400
+net.core.wmem_default=26214400
+net.core.netdev_max_backlog=2048
+EOF
+sysctl -p
 source /etc/os-release
 RELEASE=$ID
 VERSION=$VERSION_ID
