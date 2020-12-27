@@ -194,11 +194,63 @@ EOF
     tar -xvf kcptun-linux-amd64-20201126.tar.gz
     chmod +x udp2raw run.sh server_linux_amd64
     password=$(randpwd)
+    kcpkey=$(randpwd)
 
+
+cat > /usr/src/udp/server.json <<-EOF
+{
+    "listen": "127.0.0.1:11235",
+    "target": "127.0.0.1:11234",
+    "key": "$kcpkey",
+    "crypt": "aes-128",
+    "mode": "manual",
+    "mtu": 1300,
+    "sndwnd": 1024,
+    "rcvwnd": 1024,
+    "datashard": 30,
+    "parityshard": 15,
+    "dscp": 46,
+    "nocomp": true,
+    "acknodelay": false,
+    "nodelay": 0,
+    "interval": 20,
+    "resend": 2,
+    "nc": 1,
+    "sockbuf": 4194304,
+    "keepalive": 10
+}
+EOF
+
+cat > /usr/src/udp/client.json <<-EOF
+{
+    "localaddr": "127.0.0.1:3090",
+    "remoteaddr": "127.0.0.1:3091",
+    "key": "atrandys",
+    "crypt": "aes-128",
+    "mode": "manual",
+    "conn": 1,
+    "autoexpire": 300,
+    "mtu": 1300,
+    "sndwnd": 128,
+    "rcvwnd": 1024,
+    "datashard": 30,
+    "parityshard": 15,
+    "dscp": 46,
+    "nocomp": true,
+    "acknodelay": false,
+    "nodelay": 0,
+    "interval": 20,
+    "resend": 2,
+    "nc": 1,
+    "sockbuf": 4194304,
+    "keepalive": 10
+}
+EOF
 
 cat > /usr/src/udp/udp.sh <<-EOF
 #!/bin/bash
-nohup usr/src/udp/udp2raw -s -l0.0.0.0:443 -r 127.0.0.1:11234  --raw-mode faketcp  -a -k $password >udp2raw.log 2>&1 &
+nohup /usr/src/udp/udp2raw -s -l0.0.0.0:443 -r 127.0.0.1:11235  --raw-mode faketcp  -a -k $password >udp2raw.log 2>&1 &
+nohup /usr/src/udp/server_linux_amd64 -c /usr/src/udp/server.json >kcptun.log 2>&1 &
 EOF
 
     chmod +x /usr/src/udp/udp.sh
@@ -230,10 +282,10 @@ EOF
     systemctl restart xray
 
 cat > /usr/local/etc/xray/myconfig.json<<-EOF
-{
+
 ==xray配置==
 IP：127.0.0.1
-端口：2090
+端口：3090
 id：${v2uuid}
 加密：none
 别名：自定义
@@ -251,11 +303,35 @@ IP：${serverip}
 端口：443
 password：${password}
 raw-mode：faketcp
+==kcptun==
+{
+    "localaddr": "127.0.0.1:3090",
+    "remoteaddr": "127.0.0.1:3091",
+    "key": "atrandys",
+    "crypt": "aes-128",
+    "mode": "manual",
+    "conn": 1,
+    "autoexpire": 300,
+    "mtu": 1300,
+    "sndwnd": 128,
+    "rcvwnd": 1024,
+    "datashard": 30,
+    "parityshard": 15,
+    "dscp": 46,
+    "nocomp": true,
+    "acknodelay": false,
+    "nodelay": 0,
+    "interval": 20,
+    "resend": 2,
+    "nc": 1,
+    "sockbuf": 4194304,
+    "keepalive": 10
 }
+
 EOF
 
     green "== 安装完成."
-    green "==xray配置参数=="
+    green "==配置参数=="
     cat /usr/local/etc/xray/myconfig.json
     green "本次安装检测信息如下，如udp2raw与xray正常启动，表示安装正常："
     ps -aux | grep -e udp2raw -e xray
