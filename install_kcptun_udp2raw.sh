@@ -161,20 +161,7 @@ cat > /usr/local/etc/xray/config.json<<-EOF
                 "decryption": "none"
             }, 
             "streamSettings": {
-                "network": "kcp", 
-                "kcpSettings": {
-                    "mtu": 1300,
-                    "tti": 10,
-                    "uplinkCapacity": 50,
-                    "downlinkCapacity": 10,
-                    "congestion": false,
-                    "readBufferSize": 1,
-                    "writeBufferSize": 1,
-                    "header": {
-                        "type": "none"
-                    },
-                    "seed": "$seed"
-                }
+                "network": "tcp"
             }
         }
     ], 
