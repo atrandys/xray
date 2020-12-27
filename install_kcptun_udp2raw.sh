@@ -334,7 +334,7 @@ EOF
     green "==配置参数=="
     cat /usr/local/etc/xray/myconfig.json
     green "本次安装检测信息如下，如udp2raw与xray正常启动，表示安装正常："
-    ps -aux | grep -e udp2raw -e xray
+    ps -aux | grep -e udp2raw -e xray -e kcptun
     
 }
 
