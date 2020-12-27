@@ -236,7 +236,7 @@ EOF
 
 cat > /usr/src/udp/udp.sh <<-EOF
 #!/bin/bash
-nohup /usr/src/udp/udp2raw -s -l0.0.0.0:443 -r 127.0.0.1:11235  --raw-mode faketcp  -a -k $password >udp2raw.log 2>&1 &
+nohup /usr/src/udp/udp2raw -s -l0.0.0.0:443 -r 127.0.0.1:11235  --raw-mode faketcp --cipher-mode xor -a -k $password >udp2raw.log 2>&1 &
 nohup /usr/src/udp/server_linux_amd64 -c /usr/src/udp/server.json >kcptun.log 2>&1 &
 EOF
 
