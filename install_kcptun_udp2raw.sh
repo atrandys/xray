@@ -347,7 +347,7 @@ remove_xray(){
     rm -rf /etc/systemd/system/xray*
     rm -rf /etc/systemd/system/autoudp
     rm -rf /usr/src/udp
-    green "xray & udp2raw has been deleted."
+    green "xray & udp2raw & kcptun has been deleted."
     
 }
 
