@@ -225,7 +225,7 @@ cat > /usr/src/udp/client.json <<-EOF
 {
     "localaddr": "127.0.0.1:3090",
     "remoteaddr": "127.0.0.1:3091",
-    "key": "atrandys",
+    "key": "$kcpkey",
     "crypt": "aes-128",
     "mode": "manual",
     "conn": 1,
@@ -307,7 +307,7 @@ raw-mode：faketcp
 {
     "localaddr": "127.0.0.1:3090",
     "remoteaddr": "127.0.0.1:3091",
-    "key": "atrandys",
+    "key": "$kcpkey",
     "crypt": "aes-128",
     "mode": "manual",
     "conn": 1,
