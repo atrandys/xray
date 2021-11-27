@@ -26,9 +26,9 @@ CheckRelease(){
     VERSION=$VERSION_ID
     if [ "$RELEASE" == "centos" ]; then
         if [[ "56" =~ "$VERSION" ]]; then
-		    EchoR "[error]脚本不支持当前系统."
-			exit
-		fi
+            EchoR "[error]脚本不支持当前系统."
+	    exit
+	fi
         systemPackage="yum" && yum install -y wget epel-release
         if [[ -f "/etc/selinux/config" && "$(grep SELINUX= /etc/selinux/config | grep -v "#")" != "SELINUX=disabled" ]]; then
             setenforce 0
@@ -43,11 +43,11 @@ CheckRelease(){
     elif [[ "ubuntudebian" =~ "$RELEASE" ]]; then
         systemPackage="apt-get"
         if [[ "12 14" =~ "$VERSION" ]]; then
-		    EchoR "[error]脚本不支持当前系统."
-			exit
-		fi
+	    EchoR "[error]脚本不支持当前系统."
+	    exit
+	fi
         if [ -n "$(systemctl status ufw | grep "Active: active":-'')" ]; then
-		    #EchoG "添加放行80/443端口规则."
+            #EchoG "添加放行80/443端口规则."
             ufw allow 80/tcp
             ufw allow 443/tcp
             ufw reload
@@ -71,7 +71,7 @@ CheckPort(){
 
 CheckDomain(){
     $systemPackage install -y wget curl unzip
-	EchoB "输入已解析到VPS的域名，请不要带https://或http://，例如可以输入：" "atrandys.com" 
+    EchoB "输入已解析到VPS的域名，请不要带https://或http://，例如可以输入：" "atrandys.com" 
     EchoB "请输入域名:"
     read yourDomain
  #   realAddr=`ping ${yourDomain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}'`
@@ -80,9 +80,9 @@ CheckDomain(){
         EchoG "[3]域名验证通过."
     else
         EchoR "[error]域名解析地址与VPS IP地址不匹配，可能的原因："
-		EchoY "1.不可开启CDN"
-		EchoY "2.解析还未生效"
-		EchoY "3.输入的域名有误"
+	EchoY "1.不可开启CDN"
+	EchoY "2.解析还未生效"
+	EchoY "3.输入的域名有误"
         read -p "若无上述问题，强制安装?是否继续 [Y/n] :" yn
         [ -z "${yn}" ] && yn="y"
         if [[ $yn == [Yy] ]]; then
@@ -140,11 +140,11 @@ CreateCert(){
 		~/.acme.sh/acme.sh  --issue  -d $yourDomain  --standalone
 		systemctl start nginx
 		if test -s /root/.acme.sh/$yourDomain/fullchain.cer; then
-			EchoG "[info]standalone模式申请证书成功."
+		    EchoG "[info]standalone模式申请证书成功."
 		else
-			EchoR "[error]standalone模式申请证书失败，请稍后自行申请并相应命名，置于以下路径："
-			EchoG "/usr/local/etc/xray/cert/fullchain.cer"
-			EchoG "/usr/local/etc/xray/cert/private.key"
+		    EchoR "[error]standalone模式申请证书失败，请稍后自行申请并相应命名，置于以下路径："
+		    EchoG "/usr/local/etc/xray/cert/fullchain.cer"
+		    EchoG "/usr/local/etc/xray/cert/private.key"
 		fi
 	fi		
 }
@@ -270,7 +270,7 @@ EOF
         --key-file   /usr/local/etc/xray/cert/private.key \
         --fullchain-file  /usr/local/etc/xray/cert/fullchain.cer \
         --reloadcmd  "chmod -R 777 /usr/local/etc/xray/cert"
-	 systemctl restart xray.service
+    systemctl restart xray.service
 
 cat > /usr/local/etc/xray/myconfig.json<<-EOF
 {
@@ -288,7 +288,7 @@ id：${v2uuid}
 EOF
 
     EchoG "[6]Xray安装完成."
-	echo
+    echo
     EchoG "xray客户端配置文件存放路径: " "/usr/local/etc/xray/client.json"
     echo
     echo
@@ -329,7 +329,7 @@ function StartMenu(){
     EchoG " 描述：" "xray + tcp + xtls一键安装脚本"
     EchoG " 系统：" "支持centos7/debian9+/ubuntu16.04+     "
     EchoG " 作者：" "atrandys"
-	EchoG " 博客：" "www.atrandys.com"
+    EchoG " 博客：" "www.atrandys.com"
     EchoG " ====================================================="
     echo
     EchoG " 1. 安装 xray + tcp + xtls"
@@ -341,12 +341,12 @@ function StartMenu(){
     read -p "输入数字:" num
     case "$num" in
     1)
-	CheckRelease
-	CheckPort
-	CheckDomain
-	InstallNginx
-	CreateCert
-	InstallXray
+    CheckRelease
+    CheckPort
+    CheckDomain
+    InstallNginx
+    CreateCert
+    InstallXray
     ;;
     2)
     bash <(curl -L https://raw.githubusercontent.com/XTLS/Xray-install/main/install-release.sh)
