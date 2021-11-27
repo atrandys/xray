@@ -133,19 +133,19 @@ CreateCert(){
 	~/.acme.sh/acme.sh  --register-account  -m test@$yourDomain --server zerossl
 	~/.acme.sh/acme.sh  --issue  -d $yourDomain  --webroot /usr/share/nginx/html/
 	if test -s /root/.acme.sh/$yourDomain/fullchain.cer; then
-		EchoG "[5]申请证书成功."
+	    EchoG "[5]申请证书成功."
 	else
-		EchoR "[error]申请证书失败，开始尝试使用standalone模式申请。"
-		systemctl stop nginx
-		~/.acme.sh/acme.sh  --issue  -d $yourDomain  --standalone
-		systemctl start nginx
-		if test -s /root/.acme.sh/$yourDomain/fullchain.cer; then
-		    EchoG "[info]standalone模式申请证书成功."
-		else
-		    EchoR "[error]standalone模式申请证书失败，请稍后自行申请并相应命名，置于以下路径："
-		    EchoG "/usr/local/etc/xray/cert/fullchain.cer"
-		    EchoG "/usr/local/etc/xray/cert/private.key"
-		fi
+	    EchoR "[error]申请证书失败，开始尝试使用standalone模式申请。"
+	    systemctl stop nginx
+	    ~/.acme.sh/acme.sh  --issue  -d $yourDomain  --standalone
+	    systemctl start nginx
+	    if test -s /root/.acme.sh/$yourDomain/fullchain.cer; then
+	        EchoG "[info]standalone模式申请证书成功."
+	    else
+	        EchoR "[error]standalone模式申请证书失败，请稍后自行申请并相应命名，置于以下路径："
+	        EchoG "/usr/local/etc/xray/cert/fullchain.cer"
+	        EchoG "/usr/local/etc/xray/cert/private.key"
+	    fi
 	fi		
 }
 
