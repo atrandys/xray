@@ -342,6 +342,7 @@ id：${v2uuid}
 底层传输：xtls
 跳过证书验证：false
 }
+导入链接：vless://${v2uuid}@${your_domain}:443?security=xtls&flow=xtls-rprx-direct#XTLS_atrandys-${your_domain}
 EOF
 
     green "== 安装完成."
