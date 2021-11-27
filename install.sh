@@ -27,14 +27,14 @@ CheckRelease(){
     if [ "$RELEASE" == "centos" ]; then
         if [[ "56" =~ "$VERSION" ]]; then
             EchoR "[error]脚本不支持当前系统."
-	    exit
-	fi
+            exit
+        fi
         systemPackage="yum" && yum install -y wget epel-release
         if [[ -f "/etc/selinux/config" && "$(grep SELINUX= /etc/selinux/config | grep -v "#")" != "SELINUX=disabled" ]]; then
             setenforce 0
             sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
         fi
-        if [ "$(firewall-cmd --state:-'no')" == "running" ]; then
+        if [ "$(firewall-cmd --state)" == "running" ]; then
             #EchoG "添加放行80/443端口规则."
             firewall-cmd --zone=public --add-port=80/tcp --permanent
             firewall-cmd --zone=public --add-port=443/tcp --permanent
@@ -43,10 +43,10 @@ CheckRelease(){
     elif [[ "ubuntudebian" =~ "$RELEASE" ]]; then
         systemPackage="apt-get"
         if [[ "12 14" =~ "$VERSION" ]]; then
-	    EchoR "[error]脚本不支持当前系统."
-	    exit
-	fi
-        if [ -n "$(systemctl status ufw | grep "Active: active":-'')" ]; then
+            EchoR "[error]脚本不支持当前系统."
+            exit
+        fi
+        if [ -n "$(systemctl status ufw | grep "Active: active")" ]; then
             #EchoG "添加放行80/443端口规则."
             ufw allow 80/tcp
             ufw allow 443/tcp
@@ -57,7 +57,7 @@ CheckRelease(){
         EchoR "[error]当前系统不被支持."
         exit
     fi
-	EchoG "[1]系统检查通过"
+    EchoG "[1]系统检查通过"
 }
 
 CheckPort(){
@@ -66,7 +66,7 @@ CheckPort(){
         EchoR "[error]80/443端口被占用，退出脚本."
         exit
     fi
-	EchoG "[2]端口检查通过"
+    EchoG "[2]端口检查通过"
 }
 
 CheckDomain(){
@@ -80,9 +80,9 @@ CheckDomain(){
         EchoG "[3]域名验证通过."
     else
         EchoR "[error]域名解析地址与VPS IP地址不匹配，可能的原因："
-	EchoY "1.不可开启CDN"
-	EchoY "2.解析还未生效"
-	EchoY "3.输入的域名有误"
+        EchoY "1.不可开启CDN"
+        EchoY "2.解析还未生效"
+        EchoY "3.输入的域名有误"
         read -p "若无上述问题，强制安装?是否继续 [Y/n] :" yn
         [ -z "${yn}" ] && yn="y"
         if [[ $yn == [Yy] ]]; then
@@ -124,29 +124,29 @@ server {
 EOF
     systemctl enable nginx.service
     systemctl restart nginx.service
-	EchoG "[4]nginx安装完成"
+    EchoG "[4]nginx安装完成"
 }
 
 CreateCert(){
-	$systemPackage -y install socat
-	curl https://get.acme.sh | sh
-	~/.acme.sh/acme.sh  --register-account  -m test@$yourDomain --server zerossl
-	~/.acme.sh/acme.sh  --issue  -d $yourDomain  --webroot /usr/share/nginx/html/
-	if test -s /root/.acme.sh/$yourDomain/fullchain.cer; then
-	    EchoG "[5]申请证书成功."
-	else
-	    EchoR "[error]申请证书失败，开始尝试使用standalone模式申请。"
-	    systemctl stop nginx
-	    ~/.acme.sh/acme.sh  --issue  -d $yourDomain  --standalone
-	    systemctl start nginx
-	    if test -s /root/.acme.sh/$yourDomain/fullchain.cer; then
-	        EchoG "[info]standalone模式申请证书成功."
-	    else
-	        EchoR "[error]standalone模式申请证书失败，请稍后自行申请并相应命名，置于以下路径："
-	        EchoG "/usr/local/etc/xray/cert/fullchain.cer"
-	        EchoG "/usr/local/etc/xray/cert/private.key"
-	    fi
-	fi		
+    $systemPackage -y install socat
+    curl https://get.acme.sh | sh
+    ~/.acme.sh/acme.sh  --register-account  -m test@$yourDomain --server zerossl
+    ~/.acme.sh/acme.sh  --issue  -d $yourDomain  --webroot /usr/share/nginx/html/
+    if test -s /root/.acme.sh/$yourDomain/fullchain.cer; then
+        EchoG "[5]申请证书成功."
+    else
+        EchoR "[error]申请证书失败，开始尝试使用standalone模式申请。"
+        systemctl stop nginx
+        ~/.acme.sh/acme.sh  --issue  -d $yourDomain  --standalone
+        systemctl start nginx
+        if test -s /root/.acme.sh/$yourDomain/fullchain.cer; then
+            EchoG "[info]standalone模式申请证书成功."
+        else
+            EchoR "[error]standalone模式申请证书失败，请稍后自行申请并相应命名，置于以下路径："
+            EchoG "/usr/local/etc/xray/cert/fullchain.cer"
+            EchoG "/usr/local/etc/xray/cert/private.key"
+        fi
+    fi        
 }
 
 InstallXray(){ 
@@ -270,7 +270,7 @@ EOF
         --key-file   /usr/local/etc/xray/cert/private.key \
         --fullchain-file  /usr/local/etc/xray/cert/fullchain.cer \
         --reloadcmd  "chmod -R 777 /usr/local/etc/xray/cert"
-    systemctl restart xray.service
+     systemctl restart xray.service
 
 cat > /usr/local/etc/xray/myconfig.json<<-EOF
 {
