@@ -29,7 +29,7 @@ CheckRelease(){
             EchoR "[error]脚本不支持当前系统."
             exit
         fi
-        systemPackage="yum" && yum install -y wget epel-release
+        systemPackage="yum" && yum install -y wget epel-release  bind-utils
         if [[ -f "/etc/selinux/config" && "$(grep SELINUX= /etc/selinux/config | grep -v "#")" != "SELINUX=disabled" ]]; then
             setenforce 0
             sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
@@ -57,7 +57,7 @@ CheckRelease(){
         EchoR "[error]当前系统不被支持."
         exit
     fi
-    EchoG "[1]系统检查通过"
+    EchoG "[1]系统支持检查通过"
 }
 
 CheckPort(){
