@@ -193,6 +193,9 @@ EOF
     systemctl restart nginx.service
     green "$(date +"%Y-%m-%d %H:%M:%S") - 使用acme.sh申请https证书."
     curl https://get.acme.sh | sh
+    blue "输入证书申请邮箱:"
+    read your_email
+    ~/.acme.sh/acme.sh --register-account -m $your_email
     ~/.acme.sh/acme.sh  --issue  -d $your_domain  --webroot /usr/share/nginx/html/
     if test -s /root/.acme.sh/$your_domain/fullchain.cer; then
         green "$(date +"%Y-%m-%d %H:%M:%S") - 申请https证书成功."
