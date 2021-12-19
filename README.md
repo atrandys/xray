@@ -13,10 +13,10 @@
 - 回落使用nginx，配置wordpress
 
 ## install.sh使用
-bash <(curl -Ls https://raw.githubusercontent.com/atrandys/xray/main/install.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/kepy909/xray-1/main/install.sh)
 
 ## install_wp.sh使用
-bash <(curl -Ls https://raw.githubusercontent.com/atrandys/xray/main/install_wp.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/kepy909/xray-1/main/install_wp.sh)
 
 ## client使用
 - OpenWrt
