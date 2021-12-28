@@ -318,8 +318,8 @@ cat > /usr/local/etc/xray/client.json<<-EOF
 EOF
     if [ -d "/usr/share/nginx/html/" ]; then
         cd /usr/share/nginx/html/ && rm -f ./*
-        wget https://github.com/atrandys/trojan/raw/master/fakesite.zip
-        unzip -o fakesite.zip
+        wget https://github.com/HFIProgramming/mikutap/archive/refs/tags/2.0.0.zip
+        unzip -o 2.0.0.zip
     fi
     systemctl enable xray.service
     sed -i "s/User=nobody/User=root/;" /etc/systemd/system/xray.service
