@@ -319,7 +319,7 @@ EOF
     if [ -d "/usr/share/nginx/html/" ]; then
         cd /usr/share/nginx/html/ && rm -f ./*
         wget https://github.com/HFIProgramming/mikutap/archive/refs/tags/2.0.0.zip
-        unzip -o 2.0.0.zip
+        unzip -o mikutap-2.0.0.zip
     fi
     systemctl enable xray.service
     sed -i "s/User=nobody/User=root/;" /etc/systemd/system/xray.service
@@ -342,7 +342,7 @@ id：${v2uuid}
 底层传输：xtls
 跳过证书验证：false
 }
-导入链接：vless://${v2uuid}@${your_domain}:443?security=xtls&flow=xtls-rprx-direct#XTLS_atrandys-${your_domain}
+导入链接：vless://${v2uuid}@${your_domain}:443?security=xtls&flow=xtls-rprx-direct#XTLS-${your_domain}-{$real_addr}
 EOF
 
     green "== 安装完成."
